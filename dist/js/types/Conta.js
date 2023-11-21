@@ -1,5 +1,28 @@
 import { TipoTransacao } from "./TipoTransacao.js";
-let saldo = 3000;
+let saldo = JSON.parse(localStorage.getItem('saldo')) || 0;
+const transacoes = JSON.parse(localStorage.getItem('transacoes'), (key, value) => {
+    if (key === 'data') {
+        return new Date(value);
+    }
+    return value;
+}) || [];
+function debitar(valor) {
+    if (valor <= 0) {
+        throw new Error('O valor a ser debitado deve ser maior que zero');
+    }
+    if (valor > saldo) {
+        throw new Error('Saldo insuficente');
+    }
+    saldo -= valor;
+    localStorage.setItem('saldo', saldo.toString());
+}
+function depositar(valor) {
+    if (valor <= 0) {
+        throw new Error('O valor a ser depositado deve ser maior que zero');
+    }
+    saldo += valor;
+    localStorage.setItem('saldo', saldo.toString());
+}
 const Conta = {
     getSaldo() {
         return saldo;
@@ -7,17 +30,23 @@ const Conta = {
     getDataAcesso() {
         return new Date();
     },
+    getGruposTransacoes() {
+        const gruposTransacoes = [];
+        const listaTransacoes = structuredClone(transacoes);
+        return;
+    },
     registrarTransacao(novaTransacao) {
         if (novaTransacao.tipoTransacao === TipoTransacao.DEPOSITO) {
-            saldo += novaTransacao.valor;
+            depositar(novaTransacao.valor);
         }
         else if (novaTransacao.tipoTransacao === TipoTransacao.TRANSFERENCIA || novaTransacao.tipoTransacao === TipoTransacao.PAGAMENTO_BOLETO) {
-            saldo -= novaTransacao.valor;
+            debitar(novaTransacao.valor);
         }
         else {
-            alert('Tipo de transação é inválida');
-            return;
+            throw new Error('Tipo de transação inválida!');
         }
+        transacoes.push(novaTransacao);
+        localStorage.setItem('transacoes', JSON.stringify(transacoes));
     }
 };
 export default Conta;

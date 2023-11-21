@@ -7,7 +7,9 @@ const elementoFormulario = document.querySelector('.block-nova-transacao form') 
  
 elementoFormulario.addEventListener('submit', function(event) {
 
-    event.preventDefault()
+    try {
+        
+        event.preventDefault()
 
     if (!elementoFormulario.checkValidity()) {
         
@@ -38,4 +40,11 @@ elementoFormulario.addEventListener('submit', function(event) {
     SaldoComponent.atualizar()
     
     elementoFormulario.reset()
+
+    } catch (error) {
+        
+        alert(error.message)
+
+    }
+
 })
