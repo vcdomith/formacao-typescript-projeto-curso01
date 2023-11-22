@@ -35,7 +35,7 @@ const Conta = {
         const listaTransacoes = structuredClone(transacoes);
         const transacoesOrdenadas = listaTransacoes.sort((t1, t2) => t2.data.getTime() - t1.data.getTime());
         let labelAtualGrupoTransacao = '';
-        for (const transacao of transacoesOrdenadas) {
+        for (let transacao of transacoesOrdenadas) {
             let labelGrupoTransacao = transacao.data.toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
             if (labelAtualGrupoTransacao !== labelGrupoTransacao) {
                 labelAtualGrupoTransacao = labelGrupoTransacao;
@@ -44,8 +44,9 @@ const Conta = {
                     transacoes: []
                 });
             }
+            gruposTransacoes.at(-1).transacoes.push(transacao);
         }
-        return;
+        return gruposTransacoes;
     },
     registrarTransacao(novaTransacao) {
         if (novaTransacao.tipoTransacao === TipoTransacao.DEPOSITO) {
@@ -53,11 +54,13 @@ const Conta = {
         }
         else if (novaTransacao.tipoTransacao === TipoTransacao.TRANSFERENCIA || novaTransacao.tipoTransacao === TipoTransacao.PAGAMENTO_BOLETO) {
             debitar(novaTransacao.valor);
+            novaTransacao.valor *= -1;
         }
         else {
             throw new Error('Tipo de transação inválida!');
         }
         transacoes.push(novaTransacao);
+        console.log(this.getGruposTransacoes());
         localStorage.setItem('transacoes', JSON.stringify(transacoes));
     }
 };
